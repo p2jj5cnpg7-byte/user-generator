@@ -1,0 +1,184 @@
+Is there a way you can turn this into a website 
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>User Generator</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box;
+      font-family: 'Courier New', monospace;
+      -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    background: #000;
+    color: #e0e0e0;
+    overflow-x: hidden;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 16px;
+    min-height: 100dvh;
+  }
+
+  #profile {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 28px;
+    width: 100%;
+  }
+
+  #avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 2px solid #4af;
+    background: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    color: #4af;
+  }
+
+  #joinDate { font-size: 12px; color: #888; letter-spacing: 1px; }
+  #usernameDisplay { font-size: 20px; color: #4af; font-weight: bold; letter-spacing: 2px; word-break: break-all; text-align: center; }
+  #passwordDisplay { font-size: 12px; color: #6c6; letter-spacing: 1px; word-break: break-all; text-align: center; }
+
+  #centerBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 360px;
+  }
+
+  #label {
+    font-size: 14px;
+    color: #999;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  #userInput {
+    background: #0a0a0a;
+    border: 2px solid #333;
+    color: #4af;
+    padding: 14px 16px;
+    font-size: 16px; /* 16px stops iOS auto-zoom */
+    font-family: 'Courier New', monospace;
+    text-align: center;
+    border-radius: 6px;
+    outline: none;
+    width: 100%;
+    transition: border 0.2s;
+  }
+
+  #userInput:focus { border-color: #4af; }
+
+  #result {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #ccc;
+    text-align: center;
+    line-height: 1.9;
+    min-height: 30px;
+    word-break: break-all;
+  }
+
+  .gen { color: #4af; }
+  .pat { color: #e9b949; }
+  .idc { color: #6c6; }
+</style>
+</head>
+<body>
+
+  <div id="profile">
+    <div id="avatar">?</div>
+    <div id="joinDate">Joined: —</div>
+    <div id="usernameDisplay">—</div>
+    <div id="passwordDisplay">Password: —</div>
+  </div>
+
+  <div id="centerBox">
+    <div id="label">Enter User</div>
+    <input id="userInput" type="text" placeholder="type a username..." autocomplete="off" autocapitalize="off" spellcheck="false" />
+    <div id="result"></div>
+  </div>
+
+<script>
+  const WORDS = ["nova","vexil","quark","zenith","orion","pixel","cobalt","raven",
+    "flux","drift","ember","onyx","helix","prism","vertex","atlas","echo","lumen",
+    "cipher","vector","solace","kernel","matrix","phantom","glitch","titan"];
+  const THINGS = ["phone","machine","engine","robot","signal","circuit","node",
+    "server","module","beacon","crystal","artifact","device","core","chip"];
+
+  const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+  const pick = arr => arr[rand(0, arr.length - 1)];
+
+  function genID() {
+    const c = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789";
+    let s = "";
+    for (let i = 0; i < 8; i++) s += c[rand(0, c.length - 1)];
+    return s;
+  }
+  function genPattern() {
+    const t = rand(1, 3);
+    if (t === 1) return { label: "WORD",   value: pick(WORDS) + "-" + pick(WORDS) };
+    if (t === 2) return { label: "YEAR",   value: String(rand(1970, 2026)) };
+    return { label: "NUMBER", value: String(rand(10000, 999999)) + "-" + pick(THINGS) };
+  }
+  function genPassword() {
+    const c = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$";
+    let s = "";
+    for (let i = 0; i < 14; i++) s += c[rand(0, c.length - 1)];
+    return s;
+  }
+  function genJoinDate() {
+    const m = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    return m[rand(0,11)] + " " + rand(1,28) + ", " + rand(2018, 2026);
+  }
+
+  const input = document.getElementById("userInput");
+  const result = document.getElementById("result");
+
+  input.addEventListener("keydown", e => {
+    if (e.key === "Enter" && input.value.trim() !== "") {
+      input.blur(); // hide mobile keyboard
+      generate(input.value.trim());
+    }
+  });
+
+  function generate(name) {
+    result.innerHTML = "<span class='gen'>generating</span>...";
+    setTimeout(() => {
+      const id = genID();
+      const pattern = genPattern();
+      const password = genPassword();
+      const joinDate = genJoinDate();
+
+      document.getElementById("avatar").textContent = name.charAt(0).toUpperCase();
+      document.getElementById("joinDate").textContent = "Joined: " + joinDate;
+      document.getElementById("usernameDisplay").textContent = name;
+      document.getElementById("passwordDisplay").textContent = "Password: " + password;
+      document.getElementById("profile").style.display = "flex";
+
+      result.innerHTML =
+        "User ID: <span class='idc'>#" + id + "</span><br>" +
+        pattern.label + ": <span class='pat'>" + pattern.value + "</span>";
+
+      input.value = "";
+      input.placeholder = "enter another user...";
+    }, 700);
+  }
+</script>
+</body>
+</html>
